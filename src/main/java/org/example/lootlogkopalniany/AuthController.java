@@ -34,7 +34,7 @@ public class AuthController {
 
     @GetMapping("/t")
     public String getToken(@RequestBody String string){
-        return String;
+        return "asda";
     }
 }
 
