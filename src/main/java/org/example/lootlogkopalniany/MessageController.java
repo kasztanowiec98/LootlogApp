@@ -36,7 +36,6 @@ public class MessageController {
     @Autowired
     private UserMapperRepository userMapperRepository;
 
-    @CrossOrigin(origins = "https://experimental.margonem.pl")
     @PostMapping("/save")
     public void receiveMessage(@RequestBody String message, HttpServletRequest request) {
         try {
