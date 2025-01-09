@@ -30,40 +30,27 @@ public class WebConfig implements WebMvcConfigurer {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // Wyłączenie CSRF
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/authenticate", "/auth/register").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/**").hasAuthority("USER")
-                        .anyRequest().authenticated()
+                        .requestMatchers("/auth/authenticate", "/auth/register").permitAll() // Publiczne endpointy
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()             // Obsługa OPTIONS
+                        .requestMatchers("/api/**").hasAuthority("USER")                    // Zabezpieczenie endpointów /api/**
+                        .anyRequest().authenticated()                                       // Pozostałe endpointy wymagają autoryzacji
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Brak sesji
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);
 
-        // Dodanie obsługi CORS
-        http.cors(corsCustomizer -> corsCustomizer.configurationSource(corsConfigurationSource()));
-
+        // Usuń konfigurację CORS – obsługę przejmuje SimpleCorsFilter
         return http.build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOriginPattern("*");
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.addAllowedHeader("*");
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
     }
 }
