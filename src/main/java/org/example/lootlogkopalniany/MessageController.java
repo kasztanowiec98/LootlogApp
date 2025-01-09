@@ -10,6 +10,7 @@ import org.example.lootlogkopalniany.Entities.Repositories.EqEntityRepository;
 import org.example.lootlogkopalniany.Entities.EqService;
 import org.example.lootlogkopalniany.Entities.Repositories.UserMapperRepository;
 import org.example.lootlogkopalniany.Entities.UserMapper;
+import org.example.lootlogkopalniany.RequestsClasses.AddUserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,8 @@ public class MessageController {
     private EqEntityRepository eqEntityRepository; // Wstrzykujemy repozytorium
     @Autowired
     private EqService eqService;
+    @Autowired
+    private UserMapperService userMapperService;
 
     @Autowired
     private UserMapperRepository userMapperRepository;
@@ -77,8 +80,6 @@ public class MessageController {
             System.err.println("Błąd podczas przetwarzania wiadomości: " + e.getMessage());
         }
     }
-
-
     @GetMapping("/users")
     public List<EqEntityDTO> getUsers(@RequestParam int page) {
         try {
@@ -93,13 +94,23 @@ public class MessageController {
     }
 
     @PostMapping("/adduser")
-    public void addUser(@RequestBody String message){
+    public String addUser(@RequestBody AddUserRequest request) {
+
+        UserMapper userMapper = new UserMapper();
+        userMapper.setIsActive("true");
+        userMapper.setUsername(request.getName());
+        userMapper.setUserid(userMapperService.extractPlayerId(request.getUrl()));
+
+        userMapperRepository.save(userMapper);
+
+        return "Saved";
+
     }
 
 
     @PostMapping ("/active")
     public void isActiveUser(@RequestBody ActivationUserRequest message){
-        UserMapper userMapper = userMapperRepository.findByUserid(message.getUserid().toString());
+        UserMapper userMapper = userMapperRepository.findByUserid(message.getUserid());
         userMapper.setIsActive("true");
         userMapperRepository.save(userMapper);
     }
