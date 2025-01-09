@@ -42,8 +42,9 @@ public class WebConfig implements WebMvcConfigurer {
                         .anyRequest().authenticated()                                       // Pozostałe endpointy wymagają autoryzacji
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Brak sesji
+                .addFilterBefore(new SimpleCorsFilter(), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtAuthenticationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);
-
+        
         // Usuń konfigurację CORS – obsługę przejmuje SimpleCorsFilter
         return http.build();
     }
