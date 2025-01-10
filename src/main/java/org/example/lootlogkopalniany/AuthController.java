@@ -2,6 +2,8 @@ package org.example.lootlogkopalniany;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,8 +29,21 @@ public class AuthController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<JwtResponse> authenticate(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<JwtResponse> authenticate(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         String token = authService.authenticate(loginRequest);
+
+        // Tworzenie ciasteczka
+        Cookie jwtCookie = new Cookie("jwt_token", token);
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setSecure(true);
+        jwtCookie.setPath("/");
+        jwtCookie.setDomain("cypis-ll.pl");
+        jwtCookie.setMaxAge(60 * 60 * 24);
+
+        // Dodanie ciasteczka do odpowiedzi
+        response.addCookie(jwtCookie);
+
+        // Zwrot odpowiedzi JSON
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
