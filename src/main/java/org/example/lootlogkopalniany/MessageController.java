@@ -11,7 +11,11 @@ import org.example.lootlogkopalniany.Entities.EqService;
 import org.example.lootlogkopalniany.Entities.Repositories.UserMapperRepository;
 import org.example.lootlogkopalniany.Entities.UserMapper;
 import org.example.lootlogkopalniany.RequestsClasses.AddUserRequest;
+import org.example.lootlogkopalniany.RequestsClasses.DeleteRequest;
+import org.example.lootlogkopalniany.RequestsClasses.UpdateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -89,6 +93,45 @@ public class MessageController {
         } catch (Exception e) {
             System.err.println("Błąd podczas pobierania użytkowników: " + e.getMessage());
             return Collections.emptyList();  // Jeśli coś pójdzie nie tak, zwracamy pustą listę
+        }
+    }
+
+    @DeleteMapping("/deleteuser")
+    public ResponseEntity<String> deleteUser(@RequestBody DeleteRequest request) {
+        try {
+            UserMapper user = userMapperRepository.findByUserid(request.getUserid());
+            if (user == null) {
+                throw new UserNotFoundException("User not found with userid: " + request.getUserid());
+            }
+
+            userMapperRepository.delete(user);
+            return ResponseEntity.ok("User deleted successfully.");
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
+        }
+    }
+
+    @PutMapping("/updateuser")
+    public ResponseEntity<String> updateUser(@RequestBody UpdateRequest request) {
+        try {
+            // Znajdź użytkownika po userid
+            UserMapper user = userMapperRepository.findByUserid(request.getUserid());
+            if (user == null) {
+                throw new UserNotFoundException("User not found with userid: " + request.getUserid());
+            }
+
+            // Aktualizacja danych użytkownika
+            if (request.getNewuserid() != null) {
+                user.setUserid(request.getNewuserid());
+            }
+            userMapperRepository.save(user); // Zapisanie zaktualizowanego użytkownika
+            return ResponseEntity.ok("User updated successfully.");
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
         }
     }
 
