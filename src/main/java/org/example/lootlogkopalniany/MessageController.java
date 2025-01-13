@@ -117,7 +117,12 @@ public class MessageController {
     }
 
     @PutMapping("/updateuser")
-    public ResponseEntity<String> updateUser(@RequestBody UpdateRequest request) {
+    public ResponseEntity<String> updateUser(@RequestBody UpdateRequest request, HttpServletRequest httpRequest) {
+
+        httpRequest.getHeaderNames().asIterator().forEachRemaining(header -> {
+            System.out.println(header + ": " + httpRequest.getHeader(header));
+        });
+        
         try {
             UserMapper user = userMapperRepository.findByUserid(request.getUserid());
             if (user == null) {
@@ -128,7 +133,7 @@ public class MessageController {
                 user.setUserid(request.getNewuserid());
             }
 
-            entityManager.merge(user); // Wymuszenie synchronizacji z bazą danych
+            userMapperRepository.save(user);
 
             return ResponseEntity.ok("User updated successfully.");
         } catch (UserNotFoundException e) {
