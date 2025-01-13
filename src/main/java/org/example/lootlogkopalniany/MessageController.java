@@ -2,6 +2,7 @@ package org.example.lootlogkopalniany;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import org.example.lootlogkopalniany.Entities.ActivationUserRequest;
 import org.example.lootlogkopalniany.Entities.DTO.EqEntityDTO;
@@ -36,6 +37,8 @@ public class MessageController {
     private EqService eqService;
     @Autowired
     private UserMapperService userMapperService;
+    @Autowired
+    private EntityManager entityManager;
 
     @Autowired
     private UserMapperRepository userMapperRepository;
@@ -116,21 +119,22 @@ public class MessageController {
     @PutMapping("/updateuser")
     public ResponseEntity<String> updateUser(@RequestBody UpdateRequest request) {
         try {
-            // Znajdź użytkownika po userid
             UserMapper user = userMapperRepository.findByUserid(request.getUserid());
             if (user == null) {
                 throw new UserNotFoundException("User not found with userid: " + request.getUserid());
             }
 
-            // Aktualizacja danych użytkownika
             if (request.getNewuserid() != null) {
                 user.setUserid(request.getNewuserid());
             }
-            userMapperRepository.save(user); // Zapisanie zaktualizowanego użytkownika
+
+            entityManager.merge(user); // Wymuszenie synchronizacji z bazą danych
+
             return ResponseEntity.ok("User updated successfully.");
         } catch (UserNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
         }
     }
