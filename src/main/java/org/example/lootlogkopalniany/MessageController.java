@@ -119,6 +119,8 @@ public class MessageController {
     @PutMapping("/updateuser")
     public ResponseEntity<String> updateUser(@RequestBody UpdateRequest request, HttpServletRequest httpRequest) {
 
+        System.out.println("something");
+
         httpRequest.getHeaderNames().asIterator().forEachRemaining(header -> {
             System.out.println(header + ": " + httpRequest.getHeader(header));
         });

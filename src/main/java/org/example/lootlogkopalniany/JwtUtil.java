@@ -1,6 +1,7 @@
 package org.example.lootlogkopalniany;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.AllArgsConstructor;
@@ -55,10 +56,16 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()  // Use parserBuilder instead of parser
-                .setSigningKey(secretKey)
-                .build()  // Build the parser before parsing the token
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (JwtException e) {
+            System.out.println("Invalid JWT: " + e.getMessage());
+            throw e; // Możesz rzucić wyjątek dalej
+        }
+
     }
-}
+    }
