@@ -122,7 +122,7 @@ public class MessageController {
         httpRequest.getHeaderNames().asIterator().forEachRemaining(header -> {
             System.out.println(header + ": " + httpRequest.getHeader(header));
         });
-        
+
         try {
             UserMapper user = userMapperRepository.findByUserid(request.getUserid());
             if (user == null) {
