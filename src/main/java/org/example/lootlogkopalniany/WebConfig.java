@@ -37,6 +37,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/authenticate", "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/deleteuser").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/updateuser").permitAll()
                         .requestMatchers("/api/**").hasAuthority("USER")
                         .anyRequest().authenticated()
                 )
