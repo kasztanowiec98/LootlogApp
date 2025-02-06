@@ -10,6 +10,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Getter
 @Setter
@@ -36,6 +38,6 @@ public class EqEntity {
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
-    private LocalDateTime insertDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Europe/Warsaw")
+    private ZonedDateTime insertDate = ZonedDateTime.now(ZoneId.of("Europe/Warsaw"));
 }
