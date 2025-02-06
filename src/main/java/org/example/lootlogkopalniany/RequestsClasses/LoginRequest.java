@@ -1,4 +1,4 @@
-package org.example.lootlogkopalniany;
+package org.example.lootlogkopalniany.RequestsClasses;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +9,9 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class JwtResponse {
+public class LoginRequest {
 
-    private String token;
+    private String username;
+    private String password;
 
 }
-

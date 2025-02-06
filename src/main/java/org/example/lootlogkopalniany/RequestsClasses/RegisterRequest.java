@@ -1,4 +1,4 @@
-package org.example.lootlogkopalniany;
+package org.example.lootlogkopalniany.RequestsClasses;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

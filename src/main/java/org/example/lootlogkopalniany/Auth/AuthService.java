@@ -1,7 +1,9 @@
-package org.example.lootlogkopalniany;
+package org.example.lootlogkopalniany.Auth;
 
 import org.example.lootlogkopalniany.Entities.PageUsers.PageUserRepository;
 import org.example.lootlogkopalniany.Entities.PageUsers.PageUser;
+import org.example.lootlogkopalniany.RequestsClasses.LoginRequest;
+import org.example.lootlogkopalniany.RequestsClasses.RegisterRequest;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;

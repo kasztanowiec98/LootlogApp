@@ -1,4 +1,4 @@
-package org.example.lootlogkopalniany;
+package org.example.lootlogkopalniany.Auth;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

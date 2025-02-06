@@ -1,9 +1,11 @@
-package org.example.lootlogkopalniany;
+package org.example.lootlogkopalniany.Auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.lootlogkopalniany.RequestsClasses.LoginRequest;
+import org.example.lootlogkopalniany.RequestsClasses.RegisterRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
