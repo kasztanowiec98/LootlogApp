@@ -4,6 +4,7 @@ import org.example.lootlogkopalniany.Entities.ActivationUserRequest;
 import org.example.lootlogkopalniany.Entities.DTO.EqEntityDTO;
 import org.example.lootlogkopalniany.Services.EqService;
 import org.example.lootlogkopalniany.RequestsClasses.*;
+import org.example.lootlogkopalniany.Services.LootService;
 import org.example.lootlogkopalniany.Services.UserMapperService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,20 +17,22 @@ import java.util.List;
 public class MessageController {
 
     private final EqService eqService;
+    private final LootService lootService;
     private final UserMapperService userMapperService;
 
-    public MessageController(EqService eqService, UserMapperService userMapperService) {
+    public MessageController(EqService eqService, LootService lootService, UserMapperService userMapperService) {
         this.eqService = eqService;
+        this.lootService = lootService;
         this.userMapperService = userMapperService;
     }
 
     @PostMapping("/save")
-    public ResponseEntity<String> receiveMessage(@RequestBody String message) {
-        boolean saved = eqService.processAndSaveEquipment(message);
+    public ResponseEntity<String> receiveMessage(@RequestBody SaveLootRequest request) {
+        boolean saved = lootService.processLoot(request);
         if (saved) {
-            return ResponseEntity.ok("Zapisano do bazy danych.");
+            return ResponseEntity.ok("Zapisano do bazy danych (ekwipunek + przeciwnik).");
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Błąd przetwarzania wiadomości.");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Błąd: użytkownik nie istnieje w bazie.");
     }
 
     @GetMapping("/users")

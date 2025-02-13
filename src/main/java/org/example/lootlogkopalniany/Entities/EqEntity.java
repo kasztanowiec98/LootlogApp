@@ -32,9 +32,10 @@ public class EqEntity {
     @NotEmpty(message = "rariry is required")
     private String rarity;
 
-    @ManyToOne
-    @JoinColumn(name = "usermapper_id")
-    private UserMapper usermapper;
+    private String username;
+
+    @NotEmpty(message = "ikona is required")
+    private String ikona;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

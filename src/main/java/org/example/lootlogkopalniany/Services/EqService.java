@@ -7,6 +7,7 @@ import org.example.lootlogkopalniany.Entities.EqEntity;
 import org.example.lootlogkopalniany.Entities.Repositories.EqEntityRepository;
 import org.example.lootlogkopalniany.Entities.Repositories.UserMapperRepository;
 import org.example.lootlogkopalniany.Entities.UserMapper;
+import org.example.lootlogkopalniany.RequestsClasses.SaveLootRequest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,36 +20,37 @@ public class EqService {
 
     private final EqEntityRepository eqEntityRepository;
     private final UserMapperRepository userMapperRepository;
-    private final ObjectMapper objectMapper;
+    private final ValidatorService validatorService;
 
-    public EqService(EqEntityRepository eqEntityRepository, UserMapperRepository userMapperRepository) {
+    public EqService(EqEntityRepository eqEntityRepository, UserMapperRepository userMapperRepository, ValidatorService validatorService) {
         this.eqEntityRepository = eqEntityRepository;
         this.userMapperRepository = userMapperRepository;
-        this.objectMapper = new ObjectMapper();
+        this.validatorService = validatorService;
     }
 
-    public boolean processAndSaveEquipment(String message) {
+    public boolean processAndSaveEquipment(SaveLootRequest request) {
         try {
-            JsonNode jsonNode = objectMapper.readTree(message);
-            String userId = jsonNode.path("user").asText();
-            JsonNode stateJsonNode = jsonNode.path("loot").path("states");
-            String stateNumber = stateJsonNode.fieldNames().next();
+            // Walidacja użytkownika
+            if (!validatorService.isUserValid(request.getUser())) {
+                System.out.println("Użytkownik nie istnieje: " + request.getUser());
+                return false;
+            }
 
-            String itemName = jsonNode.path("item").path(stateNumber).path("name").asText();
-            String itemNumber = jsonNode.path("item").path(stateNumber).path("hid").asText();
-            String rarity = HelperService.extractRarity(jsonNode.path("item").path(stateNumber).path("stat").asText());
-
-            UserMapper userMapper = userMapperRepository.findByUserid(userId);
+            // Pobranie nazwy użytkownika
+            UserMapper userMapper = userMapperRepository.findUsernameByUserid(request.getUser());
             if (userMapper == null) return false;
 
             EqEntity eqEntity = new EqEntity();
-            eqEntity.setItemname(itemName);
-            eqEntity.setItemnumber(itemNumber);
-            eqEntity.setRarity(rarity);
-            eqEntity.setUsermapper(userMapper);
+            eqEntity.setIkona(request.getIkona());
+            eqEntity.setItemname(request.getItem());
+            eqEntity.setItemnumber(request.getItemnumber());
+            eqEntity.setRarity(request.getRarity());
+            eqEntity.setUsername(userMapper.getUsername());
+
             eqEntityRepository.save(eqEntity);
             return true;
         } catch (Exception e) {
+            System.err.println("Błąd zapisu ekwipunku: " + e.getMessage());
             return false;
         }
     }
@@ -63,8 +65,9 @@ public class EqService {
                         entity.getItemname(),
                         entity.getRarity(),
                         entity.getItemnumber(),
-                        entity.getUsermapper() != null ? entity.getUsermapper().getUsername() : "Brak użytkownika",
-                        entity.getInsertDate()  // Dodanie daty do DTO
+                        entity.getUsername() != null ? entity.getUsername(): "Brak użytkownika",
+                        entity.getIkona(),  // Dodanie daty do DTO
+                        entity.getInsertDate()
                 ))
                 .collect(Collectors.toList());
     }

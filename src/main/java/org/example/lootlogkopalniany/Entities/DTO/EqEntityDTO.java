@@ -20,6 +20,7 @@ public class EqEntityDTO {
     private String rarity;
     private String itemnumber;
     private String username;
+    private String ikona;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "Europe/Warsaw")
     private ZonedDateTime insertDate = ZonedDateTime.now(ZoneId.of("Europe/Warsaw"));
 }
