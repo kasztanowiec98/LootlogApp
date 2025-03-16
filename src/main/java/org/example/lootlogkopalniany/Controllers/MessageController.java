@@ -1,7 +1,9 @@
 package org.example.lootlogkopalniany.Controllers;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.lootlogkopalniany.Entities.ActivationUserRequest;
 import org.example.lootlogkopalniany.Entities.DTO.EqEntityDTO;
+import org.example.lootlogkopalniany.Entities.FightEntity;
 import org.example.lootlogkopalniany.Services.EqService;
 import org.example.lootlogkopalniany.RequestsClasses.*;
 import org.example.lootlogkopalniany.Services.LootService;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "API", description = "API for user management")
 @RestController
 @RequestMapping("/api")
 public class MessageController {
@@ -26,13 +29,20 @@ public class MessageController {
         this.userMapperService = userMapperService;
     }
 
+    @Tag(name = "save loot", description = "loot save from game")
     @PostMapping("/save")
-    public ResponseEntity<String> receiveMessage(@RequestBody SaveLootRequest request) {
-        boolean saved = lootService.processLoot(request);
+    public ResponseEntity<String> saveLoot(@RequestBody SaveLootRequest request) {
+        boolean saved = lootService.processAndSaveEquipment(request);
         if (saved) {
-            return ResponseEntity.ok("Zapisano do bazy danych (ekwipunek + przeciwnik).");
+            return ResponseEntity.ok("Loot zapisany.");
         }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Błąd: użytkownik nie istnieje w bazie.");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Błąd zapisu.");
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<FightEntity>> getFightHistory() {
+        List<FightEntity> history = lootService.getFightHistory();
+        return ResponseEntity.ok(history);
     }
 
     @GetMapping("/users")

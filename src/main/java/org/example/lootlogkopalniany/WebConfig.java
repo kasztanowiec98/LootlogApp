@@ -35,6 +35,12 @@ public class WebConfig implements WebMvcConfigurer {
                         .requestMatchers(HttpMethod.DELETE, "/api/deleteuser").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/updateuser").permitAll()
                         .requestMatchers("/api/**").permitAll()
+                        .requestMatchers(
+                                "/swagger-ui/**",          // Swagger UI
+                                "/v3/api-docs/**",         // OpenAPI spec
+                                "/swagger-ui.html",        // Swagger main page
+                                "/api-docs/**"             // Twoja customowa ścieżka
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

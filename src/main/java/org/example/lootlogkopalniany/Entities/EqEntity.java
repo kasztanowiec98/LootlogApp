@@ -29,16 +29,13 @@ public class EqEntity {
     @NotEmpty(message = "itemnumber is required")
     private String itemnumber;
 
-    @NotEmpty(message = "rariry is required")
+    @NotEmpty(message = "rarity is required")
     private String rarity;
-
-    private String username;
 
     @NotEmpty(message = "ikona is required")
     private String ikona;
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "Europe/Warsaw")
-    private ZonedDateTime insertDate = ZonedDateTime.now(ZoneId.of("Europe/Warsaw"));
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "fight_id")
+    private FightEntity fight;
 }

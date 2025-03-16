@@ -2,15 +2,15 @@ package org.example.lootlogkopalniany.Services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.example.lootlogkopalniany.Entities.*;
 import org.example.lootlogkopalniany.Entities.DTO.EqEntityDTO;
-import org.example.lootlogkopalniany.Entities.EqEntity;
-import org.example.lootlogkopalniany.Entities.Repositories.EqEntityRepository;
-import org.example.lootlogkopalniany.Entities.Repositories.UserMapperRepository;
-import org.example.lootlogkopalniany.Entities.UserMapper;
+import org.example.lootlogkopalniany.Entities.Repositories.*;
+import org.example.lootlogkopalniany.RequestsClasses.ItemRequest;
 import org.example.lootlogkopalniany.RequestsClasses.SaveLootRequest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.example.lootlogkopalniany.RequestsClasses.EnemyRequest;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,32 +22,65 @@ public class EqService {
     private final UserMapperRepository userMapperRepository;
     private final ValidatorService validatorService;
 
-    public EqService(EqEntityRepository eqEntityRepository, UserMapperRepository userMapperRepository, ValidatorService validatorService) {
+    private final FightEntityRepository fightRepository;
+    private final PlayerEntityRepository playerRepository;
+    private final FightPlayerEntityRepository fightPlayerRepository;
+
+    public EqService(EqEntityRepository eqEntityRepository, UserMapperRepository userMapperRepository, ValidatorService validatorService, FightEntityRepository fightRepository, PlayerEntityRepository playerRepository, FightPlayerEntityRepository fightPlayerRepository) {
         this.eqEntityRepository = eqEntityRepository;
         this.userMapperRepository = userMapperRepository;
         this.validatorService = validatorService;
+        this.fightRepository = fightRepository;
+        this.playerRepository = playerRepository;
+        this.fightPlayerRepository = fightPlayerRepository;
     }
 
     public boolean processAndSaveEquipment(SaveLootRequest request) {
         try {
-            // Walidacja użytkownika
             if (!validatorService.isUserValid(request.getUser())) {
                 System.out.println("Użytkownik nie istnieje: " + request.getUser());
                 return false;
             }
 
-            // Pobranie nazwy użytkownika
-            UserMapper userMapper = userMapperRepository.findUsernameByUserid(request.getUser());
-            if (userMapper == null) return false;
+            // Tworzymy nową walkę
+            FightEntity fightEntity = new FightEntity();
+            fightEntity.setUserId(request.getUser());
 
-            EqEntity eqEntity = new EqEntity();
-            eqEntity.setIkona(request.getIkona());
-            eqEntity.setItemname(request.getItem());
-            eqEntity.setItemnumber(request.getItemnumber());
-            eqEntity.setRarity(request.getRarity());
-            eqEntity.setUsername(userMapper.getUsername());
+            List<EqEntity> loot = request.getItems().stream()
+                    .map(item -> {
+                        EqEntity eqEntity = new EqEntity();
+                        eqEntity.setItemname(item.getItemname());
+                        eqEntity.setItemnumber(item.getItemnumber());
+                        eqEntity.setRarity(item.getRarity());
+                        eqEntity.setIkona(item.getIcon());
+                        eqEntity.setFight(fightEntity);
+                        return eqEntity;
+                    }).collect(Collectors.toList());
 
-            eqEntityRepository.save(eqEntity);
+            fightEntity.setLoot(loot);
+
+            List<FightPlayerEntity> players = request.getPlayers().stream()
+                    .map(player -> {
+                        PlayerEntity playerEntity = playerRepository.findByName(player.getName())
+                                .orElseGet(() -> {
+                                    PlayerEntity newPlayer = new PlayerEntity();
+                                    newPlayer.setName(player.getName());
+                                    return newPlayer;
+                                });
+
+                        FightPlayerEntity fightPlayer = new FightPlayerEntity();
+                        fightPlayer.setProf(player.getProf());
+                        fightPlayer.setLvl(player.getLvl());
+                        fightPlayer.setIcon(player.getIcon());
+                        fightPlayer.setFight(fightEntity);
+                        fightPlayer.setPlayer(playerEntity);
+
+                        return fightPlayer;
+                    }).collect(Collectors.toList());
+
+            fightEntity.setPlayers(players);
+
+            fightRepository.save(fightEntity);
             return true;
         } catch (Exception e) {
             System.err.println("Błąd zapisu ekwipunku: " + e.getMessage());
